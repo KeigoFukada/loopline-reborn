@@ -3,927 +3,434 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>LoopLine Ultra</title>
-  <meta name="theme-color" content="#0b0b0f" />
+  <title>LoopLine Reborn (Recovery)</title>
   <style>
     :root{
-      --bg:#0b0b0f; --panel:#12121a; --ink:#f2f3f7; --muted:#a9adbb;
-      --accent:#6ee7ff; --good:#7CFF7C; --bad:#ff6b6b; --line:#d7d9e2;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --bg:#0b0b0f;
+      --panel:#171a24;
+      --ink:#f4f6fb;
+      --muted:#a9adbb;
+      --line:#d9dbe5;
+      --good:#7cff7c;
     }
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;}
-    .wrap{max-width:980px;margin:0 auto;padding:10px 12px 16px;}
-    .top{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--panel);border-radius:16px;padding:10px 12px;box-shadow:var(--shadow);}
-    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .btn{cursor:pointer;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:var(--ink);
-      padding:10px 12px;border-radius:12px;font-weight:700;font-size:13px;user-select:none}
-    .btn:active{transform:translateY(1px)}
-    .btn.primary{background:rgba(110,231,255,.18);border-color:rgba(110,231,255,.35)}
-    .btn.warn{background:rgba(255,107,107,.14);border-color:rgba(255,107,107,.35)}
-    .pill{display:inline-flex;gap:8px;align-items:center;padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);font-size:12px;font-weight:700}
-    .pill input{accent-color:var(--accent)}
-    .stats{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;color:var(--muted);font-weight:700}
-    .hint{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.45}
-    .stage{margin-top:10px;background:var(--panel);border-radius:16px;padding:10px;box-shadow:var(--shadow);}
-    canvas{width:100%;height:auto;display:block;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));}
-    .toast{margin-top:8px;font-weight:900;color:var(--good)}
-    .right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    #clear{font-weight:1000;color:var(--good);letter-spacing:.06em}
-    .spacer{flex:1}
-
-    /* Mobile tighten */
+    *{box-sizing:border-box}
+    html,body{
+      margin:0; height:100%;
+      background:var(--bg); color:var(--ink);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans JP",sans-serif;
+    }
+    .wrap{max-width:940px; margin:0 auto; padding:10px;}
+    .top{
+      background:var(--panel);
+      border-radius:16px;
+      padding:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .row{display:flex; flex-wrap:wrap; gap:8px; align-items:center;}
+    button{
+      appearance:none; border:none; cursor:pointer;
+      background:rgba(255,255,255,.08); color:var(--ink);
+      border:1px solid rgba(255,255,255,.14);
+      padding:10px 12px; border-radius:12px; font-weight:800;
+      font-size:13px;
+    }
+    button:active{transform:translateY(1px)}
+    .primary{
+      background:rgba(124,255,124,.12);
+      border-color:rgba(124,255,124,.28);
+    }
+    .pill{
+      display:inline-flex; gap:8px; align-items:center;
+      padding:7px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      font-size:12px; font-weight:800;
+    }
+    .stats{
+      margin-top:10px; color:var(--muted);
+      display:flex; gap:12px; flex-wrap:wrap; font-weight:800;
+    }
+    .hint{
+      margin-top:6px; color:var(--muted);
+      font-size:12px; line-height:1.45;
+    }
+    .stage{
+      margin-top:10px; background:var(--panel);
+      border-radius:16px; padding:10px;
+    }
+    canvas{
+      width:100%; display:block; border-radius:14px;
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      touch-action:none;
+    }
+    #clear{color:var(--good); font-weight:1000;}
     @media (max-width:520px){
-      .top{flex-direction:column;align-items:stretch}
-      .row{justify-content:space-between}
-      .btn{padding:9px 10px;font-size:12px;border-radius:11px}
-      .pill{padding:7px 9px;font-size:12px}
-      .wrap{padding:8px 10px 14px}
+      .top{flex-direction:column; align-items:stretch}
+      button{padding:9px 10px; font-size:12px}
     }
   </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <div class="row">
-      <div class="btn primary" id="btnEndless">エンドレス開始</div>
-      <div class="btn" id="btnNew">新しい盤面</div>
-      <div class="btn" id="btnRetry">リトライ</div>
-      <div class="btn" id="btnNext">次へ</div>
-      <div class="btn" id="btnUndo">UNDO ∞</div>
+  <div class="wrap">
+    <div class="top">
+      <div class="row">
+        <button id="btnEndless" class="primary">エンドレス開始</button>
+        <button id="btnNew">新しい盤面</button>
+        <button id="btnRetry">リトライ</button>
+        <button id="btnNext">次へ</button>
+      </div>
+      <div class="row">
+        <label class="pill"><input type="checkbox" id="togHint"> HINT</label>
+        <span id="clear"></span>
+      </div>
     </div>
-    <div class="right">
-      <span class="pill"><input type="checkbox" id="togHard">HARD</span>
-      <span class="pill"><input type="checkbox" id="togHint">HINT</span>
-      <span class="pill"><input type="checkbox" id="togWall">WALL</span>
-      <span class="pill"><input type="checkbox" id="togHole">HOLE</span>
-      <span class="pill"><input type="checkbox" id="togWarp">WARP</span>
-      <span class="pill"><input type="checkbox" id="togKey">KEY</span>
-      <span class="pill"><input type="checkbox" id="togSfx" checked>SFX</span>
-      <span class="pill"><input type="checkbox" id="togBgm">BGM</span>
-      <span id="clear"></span>
+
+    <div class="stats">
+      <div>MODE: <span id="modeLabel">LEVEL</span></div>
+      <div>LEVEL <span id="levelLabel">1</span></div>
+      <div>Time <span id="timeLabel">00:00.0</span></div>
+      <div>Actions <span id="actLabel">0</span></div>
+    </div>
+
+    <div class="hint">
+      点をタップして線をつなぎ、すべての点を一度ずつ踏んで、最後にスタート地点へ戻るとCLEAR。
+    </div>
+
+    <div class="stage">
+      <canvas id="cv" width="900" height="900"></canvas>
     </div>
   </div>
 
-  <div class="stats">
-    <div>MODE: <span id="modeLabel">LEVEL</span></div>
-    <div>LEVEL <span id="levelLabel">1</span></div>
-    <div>STREAK <span id="streakLabel">0</span></div>
-    <div class="spacer"></div>
-    <div>Time <span id="timeLabel">00:00.0</span></div>
-    <div>/ Actions <span id="actLabel">0</span></div>
-    <div>/ Par <span id="parLabel">0</span></div>
-  </div>
-  <div class="hint">
-    点をなぞって全部踏む → スタートに戻るとCLEAR（上下左右＋ブリッジ）<br/>
-    HARD: 直進/曲がる制約。HOLE: なくなる点＋ブリッジ。WARP: 2点間テレポ。KEY: 鍵でゲート解除。
-  </div>
+  <script>
+    (() => {
+      const $ = (id) => document.getElementById(id);
+      const cv = $("cv");
+      const ctx = cv.getContext("2d");
 
-  <div class="stage">
-    <canvas id="cv" width="900" height="900"></canvas>
-  </div>
+      const UI = {
+        mode: $("modeLabel"),
+        level: $("levelLabel"),
+        time: $("timeLabel"),
+        act: $("actLabel"),
+        clear: $("clear")
+      };
 
-  <div class="stats">
-    <div>BEST STREAK <span id="bestLabel">0</span></div>
-    <div>TODAY <span id="todayLabel">-</span></div>
-  </div>
-</div>
+      const levels = [
+        { r: 2, c: 4 },
+        { r: 3, c: 4 },
+        { r: 4, c: 4 },
+        { r: 3, c: 6 },
+        { r: 4, c: 6 },
+        { r: 5, c: 6 }
+      ];
 
-<script>
-(() => {
-  const ASSET_VER = "3"; // 反映されない時は数字を上げてCommit（キャッシュ回避）
-  const $ = (id)=>document.getElementById(id);
+      let mode = "LEVEL";
+      let levelIdx = 0;
+      let rows = 2, cols = 4;
+      let nodes = [];      // {id,r,c,x,y,visited}
+      let startId = -1;
+      let lastId = -1;
+      let path = [];       // node ids
+      let segments = [];   // [a,b]
+      let actions = 0;
+      let startedAt = null;
+      let timer = null;
+      let dragging = false;
 
-  // ---------- Audio ----------
-  const audio = (() => {
-    const enabled = { sfx:true, bgm:false };
-    const files = {
-      bgm: `assets/bgm.mp3?v=${ASSET_VER}`,
-      start: `assets/sfx_start.mp3?v=${ASSET_VER}`,
-      step: `assets/sfx_step.mp3?v=${ASSET_VER}`,
-      undo: `assets/sfx_undo.mp3?v=${ASSET_VER}`,
-      error:`assets/sfx_error.mp3?v=${ASSET_VER}`,
-      clear:`assets/sfx_clear.mp3?v=${ASSET_VER}`,
-      key:  `assets/sfx_key.mp3?v=${ASSET_VER}`,
-      warp: `assets/sfx_warp.mp3?v=${ASSET_VER}`,
-      gate: `assets/sfx_gate.mp3?v=${ASSET_VER}`,
-    };
-
-    let unlocked = false;
-    const pool = {};
-    function make(name){
-      const a = new Audio(files[name]);
-      a.preload = "auto";
-      a.crossOrigin = "anonymous";
-      return a;
-    }
-    function play(name, vol=0.9){
-      if(!enabled.sfx) return;
-      if(!unlocked) return; // iPhone対策：最初の操作後だけ鳴らす
-      try{
-        if(!pool[name]) pool[name] = make(name);
-        const a = pool[name].cloneNode(true);
-        a.volume = vol;
-        a.play().catch(()=>{});
-      }catch(e){}
-    }
-
-    const bgm = make("bgm");
-    bgm.loop = true;
-    bgm.volume = 0.55;
-
-    function setBgm(on){
-      enabled.bgm = on;
-      if(!on){ bgm.pause(); return; }
-      if(!unlocked) return;
-      bgm.play().catch(()=>{});
-    }
-
-    function unlock(){
-      if(unlocked) return;
-      unlocked = true;
-      // これで以降の音が鳴るようになる
-      if(enabled.bgm){
-        bgm.play().catch(()=>{});
-      }
-    }
-    return { enabled, play, setBgm, unlock };
-  })();
-
-  // Unlock on first user gesture
-  window.addEventListener("pointerdown", ()=>audio.unlock(), {once:false, passive:true});
-
-  // ---------- Game Model ----------
-  const LS = {
-    get(k, d){ try{ const v = localStorage.getItem(k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
-    set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
-  };
-
-  const UI = {
-    mode: $("modeLabel"),
-    level:$("levelLabel"),
-    streak:$("streakLabel"),
-    best:$("bestLabel"),
-    today:$("todayLabel"),
-    time:$("timeLabel"),
-    act:$("actLabel"),
-    par:$("parLabel"),
-    clear:$("clear"),
-  };
-
-  const Tog = {
-    hard:$("togHard"), hint:$("togHint"), wall:$("togWall"), hole:$("togHole"),
-    warp:$("togWarp"), key:$("togKey"), sfx:$("togSfx"), bgm:$("togBgm"),
-  };
-
-  // defaults
-  const settings = LS.get("loopline_settings", {
-    hard:false, hint:false, wall:true, hole:true, warp:true, key:true, sfx:true, bgm:false
-  });
-  Object.entries(settings).forEach(([k,v])=>{ if(Tog[k]) Tog[k].checked = !!v; });
-  audio.enabled.sfx = Tog.sfx.checked;
-  audio.setBgm(Tog.bgm.checked);
-
-  function saveSettings(){
-    const s = {
-      hard:Tog.hard.checked, hint:Tog.hint.checked, wall:Tog.wall.checked, hole:Tog.hole.checked,
-      warp:Tog.warp.checked, key:Tog.key.checked, sfx:Tog.sfx.checked, bgm:Tog.bgm.checked
-    };
-    LS.set("loopline_settings", s);
-  }
-  Object.values(Tog).forEach(el => el.addEventListener("change", ()=>{
-    audio.enabled.sfx = Tog.sfx.checked;
-    audio.setBgm(Tog.bgm.checked);
-    saveSettings();
-    // toggles affect next board generation
-    draw();
-  }));
-
-  const cv = $("cv");
-  const ctx = cv.getContext("2d");
-
-  let mode = "LEVEL"; // LEVEL or ENDLESS
-  let level = LS.get("loopline_level", 1);
-  let streak = LS.get("loopline_streak", 0);
-  let bestStreak = LS.get("loopline_best", 0);
-
-  const todayKey = new Date().toISOString().slice(0,10);
-  const todayBestKey = `loopline_todaybest_${todayKey}`;
-  let todayBest = LS.get(todayBestKey, null);
-
-  UI.best.textContent = bestStreak;
-  UI.streak.textContent = streak;
-  UI.level.textContent = level;
-  UI.mode.textContent = mode;
-  UI.today.textContent = todayBest ?? "-";
-
-  // Board state
-  let board = null;
-  let path = [];      // node ids visited in order
-  let edgesUsed = new Set(); // "a-b" normalized
-  let hasKey = false;
-
-  // stats
-  let startedAt = null;
-  let timerId = null;
-  let actions = 0;
-
-  function fmtTime(ms){
-    const t = Math.max(0, ms|0);
-    const s = t/1000;
-    const mm = Math.floor(s/60);
-    const ss = (s - mm*60);
-    const s2 = String(Math.floor(ss)).padStart(2,"0");
-    const d = Math.floor((ss - Math.floor(ss))*10);
-    return `${String(mm).padStart(2,"0")}:${s2}.${d}`;
-  }
-  function tick(){
-    if(!startedAt){ UI.time.textContent = "00:00.0"; return; }
-    UI.time.textContent = fmtTime(Date.now()-startedAt);
-  }
-  function startTimer(){
-    if(startedAt) return;
-    startedAt = Date.now();
-    timerId = setInterval(tick, 100);
-  }
-  function stopTimer(){
-    if(timerId) clearInterval(timerId);
-    timerId = null;
-  }
-
-  function edgeKey(a,b){
-    return a<b ? `${a}-${b}` : `${b}-${a}`;
-  }
-
-  function nodeId(x,y,n){ return y*n + x; }
-
-  function genBaseCycle(n){
-    // Hamiltonian cycle on n x n nodes (n even), includes all nodes
-    const order = [];
-    // first row: x=0..n-1
-    for(let x=0;x<n;x++) order.push(nodeId(x,0,n));
-    // rows 1..n-1: snake excluding x=0
-    for(let y=1;y<n;y++){
-      if(y%2===1){
-        // from x=n-1 down to 1
-        for(let x=n-1;x>=1;x--) order.push(nodeId(x,y,n));
-      }else{
-        // from x=1 up to n-1
-        for(let x=1;x<n;x++) order.push(nodeId(x,y,n));
-      }
-    }
-    // then go to (0,n-1) and up first column to (0,1), then back to (0,0)
-    order.push(nodeId(0,n-1,n));
-    for(let y=n-2;y>=1;y--) order.push(nodeId(0,y,n));
-    // closure is implicit: last connects to first
-    return order;
-  }
-
-  function buildBoard(seed){
-    // level scaling: keep even grid
-    const base = 6;
-    const add = Math.min(6, Math.floor((level-1)/3)*2);
-    let n = base + add;
-    if(n%2===1) n++;
-    const rng = mulberry32(seed);
-
-    // nodes
-    const nodes = [];
-    for(let y=0;y<n;y++){
-      for(let x=0;x<n;x++){
-        nodes.push({ id: nodeId(x,y,n), x, y, hole:false, warp:false, key:false });
-      }
-    }
-
-    // solution cycle
-    let sol = genBaseCycle(n);
-
-    // holes: remove some "middle of straight segment" nodes; add bridge edges in solution
-    const holes = new Set();
-    const bridgeEdges = new Set(); // key "a-b" that are bridges
-    if(Tog.hole.checked){
-      const target = Math.min(6, 1 + Math.floor((level-1)/2)); // 1..6
-      let tries = 0;
-      while(holes.size < target && tries++ < 500){
-        const i = 1 + Math.floor(rng()*(sol.length-2));
-        const a = sol[(i-1+sol.length)%sol.length];
-        const h = sol[i];
-        const b = sol[(i+1)%sol.length];
-        if(holes.has(h)) continue;
-        if(holes.has(a) || holes.has(b)) continue;
-
-        const A = nodes[a], H = nodes[h], B = nodes[b];
-        // candidate: collinear and distance 2
-        const dx1 = H.x - A.x, dy1 = H.y - A.y;
-        const dx2 = B.x - H.x, dy2 = B.y - H.y;
-        if(dx1===dx2 && dy1===dy2 && Math.abs(dx1)+Math.abs(dy1)===1){
-          // A-H-B is straight with step 1; bridge will be A-B (dist 2)
-          holes.add(h);
+      function resizeCanvas() {
+        const rect = cv.getBoundingClientRect();
+        const dpr = Math.min(2, window.devicePixelRatio || 1);
+        const w = Math.max(320, Math.floor(rect.width * dpr));
+        if (cv.width !== w || cv.height !== w) {
+          cv.width = w;
+          cv.height = w;
         }
       }
-      // apply holes by removing them from solution, and connecting neighbors with bridge
-      if(holes.size){
-        const newSol = [];
-        for(let i=0;i<sol.length;i++){
-          const id = sol[i];
-          if(holes.has(id)){
-            const prev = sol[(i-1+sol.length)%sol.length];
-            const next = sol[(i+1)%sol.length];
-            // add bridge edge prev-next
-            bridgeEdges.add(edgeKey(prev,next));
-            continue;
+
+      function fmtTime(ms) {
+        const t = Math.max(0, ms | 0);
+        const s = t / 1000;
+        const m = Math.floor(s / 60);
+        const rs = s - m * 60;
+        return `${String(m).padStart(2,"0")}:${String(Math.floor(rs)).padStart(2,"0")}.${Math.floor((rs % 1) * 10)}`;
+      }
+
+      function startTimer() {
+        if (startedAt) return;
+        startedAt = Date.now();
+        timer = setInterval(() => {
+          UI.time.textContent = fmtTime(Date.now() - startedAt);
+        }, 100);
+      }
+
+      function stopTimer() {
+        if (timer) clearInterval(timer);
+        timer = null;
+      }
+
+      function resetStats() {
+        stopTimer();
+        startedAt = null;
+        actions = 0;
+        UI.time.textContent = "00:00.0";
+        UI.act.textContent = "0";
+        UI.clear.textContent = "";
+      }
+
+      function buildLevel(r, c) {
+        rows = r; cols = c;
+        nodes = [];
+        path = [];
+        segments = [];
+        startId = -1;
+        lastId = -1;
+        resetStats();
+
+        let id = 0;
+        for (let rr = 0; rr < rows; rr++) {
+          for (let cc = 0; cc < cols; cc++) {
+            nodes.push({ id: id++, r: rr, c: cc, x: 0, y: 0, visited: false });
           }
-          newSol.push(id);
         }
-        sol = newSol;
+        draw();
       }
-    }
-    holes.forEach(id => nodes[id].hole = true);
 
-    // Build adjacency edges
-    const allow = new Map(); // id -> Set(neiId)
-    for(const nd of nodes){
-      if(nd.hole) continue;
-      allow.set(nd.id, new Set());
-    }
-    function addEdge(a,b){
-      if(!allow.has(a) || !allow.has(b)) return;
-      allow.get(a).add(b);
-      allow.get(b).add(a);
-    }
+      function updateNodePixels() {
+        resizeCanvas();
+        const pad = Math.round(cv.width * 0.12);
+        const usable = cv.width - pad * 2;
+        const stepX = cols > 1 ? usable / (cols - 1) : usable;
+        const stepY = rows > 1 ? usable / (rows - 1) : usable;
+        const step = Math.min(stepX, stepY);
+        const ox = (cv.width - (cols - 1) * step) / 2;
+        const oy = (cv.height - (rows - 1) * step) / 2;
 
-    // normal neighbors (4-dir)
-    for(const nd of nodes){
-      if(nd.hole) continue;
-      const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
-      for(const [dx,dy] of dirs){
-        const x = nd.x+dx, y = nd.y+dy;
-        if(x<0||y<0||x>=n||y>=n) continue;
-        const id2 = nodeId(x,y,n);
-        if(nodes[id2].hole) continue;
-        addEdge(nd.id, id2);
+        for (const n of nodes) {
+          n.x = ox + n.c * step;
+          n.y = oy + n.r * step;
+        }
+        return { step };
       }
-    }
-    // bridges
-    for(const k of bridgeEdges){
-      const [a,b] = k.split("-").map(Number);
-      addEdge(a,b);
-    }
 
-    // walls (block some non-solution edges)
-    const walls = new Set();
-    // solution edges set
-    const solEdges = new Set();
-    for(let i=0;i<sol.length;i++){
-      const a = sol[i];
-      const b = sol[(i+1)%sol.length];
-      solEdges.add(edgeKey(a,b));
-    }
+      function adjacent(a, b) {
+        const A = nodes[a], B = nodes[b];
+        return Math.abs(A.r - B.r) + Math.abs(A.c - B.c) === 1;
+      }
 
-    if(Tog.wall.checked){
-      // consider all edges in allow, block some not in solution
-      const allEdges = [];
-      for(const [a, set] of allow.entries()){
-        for(const b of set){
-          if(a<b) allEdges.push([a,b]);
+      function nearestNode(px, py) {
+        let best = null, bestD = Infinity;
+        for (const n of nodes) {
+          const dx = px - n.x, dy = py - n.y;
+          const d = dx*dx + dy*dy;
+          if (d < bestD) { bestD = d; best = n; }
+        }
+        return { node: best, dist2: bestD };
+      }
+
+      function visitedCount() {
+        let count = 0;
+        for (const n of nodes) if (n.visited) count++;
+        return count;
+      }
+
+      function setActionCount(v) {
+        actions = v;
+        UI.act.textContent = String(actions);
+      }
+
+      function errorFlash() {
+        UI.clear.textContent = "×";
+        setTimeout(() => {
+          if (UI.clear.textContent === "×") UI.clear.textContent = "";
+        }, 180);
+      }
+
+      function tryStep(target) {
+        if (!target) return;
+        if (UI.clear.textContent === "CLEAR!") return;
+
+        // 1手目 = スタート決定
+        if (startId < 0) {
+          startId = target.id;
+          lastId = target.id;
+          target.visited = true;
+          path = [target.id];
+          setActionCount(actions + 1);
+          draw();
+          return;
+        }
+
+        // 一つ前に戻る = UNDO的挙動
+        if (path.length >= 2 && target.id === path[path.length - 2]) {
+          const removed = path.pop();
+          nodes[removed].visited = false;
+          segments.pop();
+          lastId = path[path.length - 1];
+          setActionCount(actions + 1);
+          draw();
+          return;
+        }
+
+        const total = rows * cols;
+
+        // 最後にスタートへ戻ってクリア
+        if (
+          target.id === startId &&
+          path.length >= 4 &&
+          adjacent(lastId, startId) &&
+          visitedCount() === total
+        ) {
+          segments.push([lastId, startId]);
+          setActionCount(actions + 1);
+          stopTimer();
+          UI.clear.textContent = "CLEAR!";
+          draw();
+          if (mode === "LEVEL") setTimeout(nextLevel, 700);
+          return;
+        }
+
+        // 不正手
+        if (target.visited) { errorFlash(); return; }
+        if (!adjacent(lastId, target.id)) { errorFlash(); return; }
+
+        // 通常手
+        if (path.length === 1) startTimer();
+        segments.push([lastId, target.id]);
+        target.visited = true;
+        path.push(target.id);
+        lastId = target.id;
+        setActionCount(actions + 1);
+        draw();
+      }
+
+      function nextLevel() {
+        levelIdx = (levelIdx + 1) % levels.length;
+        UI.level.textContent = String(levelIdx + 1);
+        const lv = levels[levelIdx];
+        buildLevel(lv.r, lv.c);
+      }
+
+      function retryLevel() {
+        const lv = levels[levelIdx];
+        buildLevel(lv.r, lv.c);
+      }
+
+      function newBoard() {
+        // 今回はシンプルに同じレベル再生成（見た目は同じ構成）
+        retryLevel();
+      }
+
+      function getHintCandidates() {
+        if (!$("togHint").checked) return [];
+        if (startId < 0 || UI.clear.textContent === "CLEAR!") return [];
+        const cands = [];
+        for (const n of nodes) {
+          if (n.visited) continue;
+          if (adjacent(lastId, n.id)) cands.push(n);
+        }
+        return cands;
+      }
+
+      function draw() {
+        if (!nodes.length) return;
+        const { step } = updateNodePixels();
+        ctx.clearRect(0, 0, cv.width, cv.height);
+
+        // パス
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.lineWidth = Math.max(6, step * 0.10);
+        ctx.strokeStyle = "rgba(217,219,229,.95)";
+        for (const [a, b] of segments) {
+          const A = nodes[a], B = nodes[b];
+          ctx.beginPath();
+          ctx.moveTo(A.x, A.y);
+          ctx.lineTo(B.x, B.y);
+          ctx.stroke();
+        }
+
+        // HINT
+        const hints = getHintCandidates();
+        if (hints.length) {
+          ctx.globalAlpha = 0.20;
+          ctx.fillStyle = "#ffffff";
+          for (const n of hints) {
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, Math.max(18, step * 0.18), 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.globalAlpha = 1;
+        }
+
+        // 点
+        const r = Math.max(10, step * 0.14);
+        for (const n of nodes) {
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+          ctx.fillStyle = n.visited ? "rgba(255,255,255,.95)" : "rgba(255,255,255,.28)";
+          ctx.fill();
+
+          if (n.id === startId) {
+            ctx.lineWidth = Math.max(3, step * 0.06);
+            ctx.strokeStyle = "rgba(124,255,124,.9)";
+            ctx.stroke();
+          }
         }
       }
-      const blockRate = Math.min(0.35, 0.12 + (level-1)*0.02);
-      for(const [a,b] of allEdges){
-        const k = edgeKey(a,b);
-        if(solEdges.has(k)) continue;
-        if(bridgeEdges.has(k)) continue;
-        if(rng() < blockRate) walls.add(k);
-      }
-    }
 
-    // warp pair
-    let warpA=null, warpB=null;
-    if(Tog.warp.checked){
-      const candidates = sol.filter(id => !nodes[id].hole);
-      warpA = candidates[Math.floor(rng()*candidates.length)];
-      warpB = candidates[Math.floor(rng()*candidates.length)];
-      // ensure different and not start
-      if(warpA===warpB) warpB = candidates[(candidates.indexOf(warpA)+Math.floor(candidates.length/2))%candidates.length];
-      nodes[warpA].warp = true;
-      nodes[warpB].warp = true;
-    }
+      // 入力（タップ/ドラッグ）
+      cv.addEventListener("pointerdown", (e) => {
+        dragging = true;
+        try { cv.setPointerCapture(e.pointerId); } catch {}
+        const rect = cv.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (cv.width / rect.width);
+        const y = (e.clientY - rect.top) * (cv.height / rect.height);
+        const { step } = updateNodePixels();
+        const { node, dist2 } = nearestNode(x, y);
+        const r = Math.max(14, step * 0.18);
+        if (node && dist2 <= (r * r * 5)) tryStep(node);
+      }, { passive: true });
 
-    // key + gate on a solution edge (requires collecting key)
-    let gateEdge=null;
-    let keyNode=null;
-    if(Tog.key.checked){
-      // pick a gate edge somewhere away from start
-      const start = sol[0];
-      const gateIdx = Math.max(4, Math.floor(sol.length*0.55));
-      const ga = sol[gateIdx%sol.length];
-      const gb = sol[(gateIdx+1)%sol.length];
-      gateEdge = edgeKey(ga, gb);
+      cv.addEventListener("pointermove", (e) => {
+        if (!dragging) return;
+        const rect = cv.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (cv.width / rect.width);
+        const y = (e.clientY - rect.top) * (cv.height / rect.height);
+        const { step } = updateNodePixels();
+        const { node, dist2 } = nearestNode(x, y);
+        const r = Math.max(14, step * 0.18);
+        if (node && dist2 <= (r * r * 3.5)) tryStep(node);
+      }, { passive: true });
 
-      // pick key earlier along solution (reachable before gate if you go that way)
-      const keyIdx = Math.max(2, Math.floor(sol.length*0.18));
-      keyNode = sol[keyIdx%sol.length];
-      nodes[keyNode].key = true;
-    }
+      cv.addEventListener("pointerup", (e) => {
+        dragging = false;
+        try { cv.releasePointerCapture(e.pointerId); } catch {}
+      }, { passive: true });
 
-    // HARD constraints derived from solution
-    const hardReq = new Map(); // id -> "H"|"V"|"T"
-    for(let i=0;i<sol.length;i++){
-      const prev = sol[(i-1+sol.length)%sol.length];
-      const cur  = sol[i];
-      const next = sol[(i+1)%sol.length];
-      const P = nodes[prev], C = nodes[cur], N = nodes[next];
-      const d1 = [C.x-P.x, C.y-P.y];
-      const d2 = [N.x-C.x, N.y-C.y];
-      const straight = (d1[0]===d2[0] && d1[1]===d2[1]);
-      if(straight){
-        hardReq.set(cur, d1[0]!==0 ? "H" : "V");
-      }else{
-        hardReq.set(cur, "T");
-      }
-    }
+      // ボタン
+      $("btnRetry").addEventListener("click", retryLevel);
+      $("btnNew").addEventListener("click", newBoard);
+      $("btnNext").addEventListener("click", nextLevel);
+      $("btnEndless").addEventListener("click", () => {
+        mode = "ENDLESS";
+        UI.mode.textContent = "ENDLESS";
+        levelIdx = 0;
+        UI.level.textContent = "1";
+        const lv = levels[levelIdx];
+        buildLevel(lv.r, lv.c);
+      });
 
-    // start fixed to sol[0]
-    const startId = sol[0];
-
-    // par heuristic: nodes count + bridges + gating etc
-    const totalNodes = sol.length;
-    const par = totalNodes + (bridgeEdges.size>0?1:0) + (Tog.key.checked?1:0) + (Tog.warp.checked?1:0);
-
-    return {
-      n, nodes, allow, walls, bridgeEdges, sol, solEdges,
-      startId, warpA, warpB, keyNode, gateEdge,
-      hardReq, par
-    };
-  }
-
-  // RNG
-  function mulberry32(a){
-    let t = a >>> 0;
-    return function(){
-      t += 0x6D2B79F5;
-      let x = Math.imul(t ^ (t >>> 15), 1 | t);
-      x ^= x + Math.imul(x ^ (x >>> 7), 61 | x);
-      return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-
-  function resetRun(keepBoard=false){
-    UI.clear.textContent = "";
-    stopTimer(); startedAt=null; tick();
-    actions = 0; UI.act.textContent = "0";
-    hasKey = false;
-    path = [];
-    edgesUsed = new Set();
-    if(!keepBoard){
-      const seed = (Date.now() + level*99991) >>> 0;
-      board = buildBoard(seed);
-    }
-    UI.par.textContent = board.par;
-    draw();
-  }
-
-  function beginLevel(){
-    resetRun(false);
-    // start is fixed; first tap selects start and begins
-  }
-
-  function setMode(m){
-    mode = m;
-    UI.mode.textContent = mode;
-  }
-
-  // ---------- Input / Moves ----------
-  function nearestNode(px,py){
-    const { n } = board;
-    const pad = getPad();
-    const size = Math.min(cv.width, cv.height) - pad*2;
-    const step = size/(n-1);
-    let best=null, bestD=1e9;
-    for(const nd of board.nodes){
-      if(nd.hole) continue;
-      const x = pad + nd.x*step;
-      const y = pad + nd.y*step;
-      const dx = px-x, dy = py-y;
-      const d2 = dx*dx+dy*dy;
-      if(d2 < bestD){ bestD=d2; best = nd; }
-    }
-    return { node: best, dist2: bestD, step };
-  }
-
-  function canTraverseEdge(a,b){
-    const k = edgeKey(a,b);
-    if(board.walls.has(k)) return false;
-    // gate blocks until key
-    if(board.gateEdge && k===board.gateEdge && !hasKey) return false;
-    return true;
-  }
-
-  function dir(a,b){
-    const A = board.nodes[a], B = board.nodes[b];
-    const dx = Math.sign(B.x - A.x);
-    const dy = Math.sign(B.y - A.y);
-    return [dx,dy];
-  }
-
-  function hardOk(nextId){
-    if(!Tog.hard.checked) return true;
-    if(path.length < 2) return true;
-    const prev = path[path.length-2];
-    const cur  = path[path.length-1];
-    const req = board.hardReq.get(cur);
-    if(!req) return true;
-    const d1 = dir(prev, cur);
-    const d2 = dir(cur, nextId);
-    const straight = (d1[0]===d2[0] && d1[1]===d2[1]);
-    if(req==="T") return !straight;
-    if(req==="H") return straight && d2[0]!==0;
-    if(req==="V") return straight && d2[1]!==0;
-    return true;
-  }
-
-  function tryMove(toId){
-    const fromId = path.length ? path[path.length-1] : null;
-    const startId = board.startId;
-
-    // first move: must start at startId (固定)
-    if(fromId==null){
-      if(toId !== startId){
-        audio.play("error", 0.8);
-        return false;
-      }
-      path.push(toId);
-      actions++; UI.act.textContent = String(actions);
-      audio.play("start", 0.9);
-      draw();
-      return true;
-    }
-
-    if(toId === fromId) return false;
-    if(path.length>1 && toId === path[path.length-2]){ // ignore tiny backtrack via drag
-      return false;
-    }
-
-    // cannot revisit nodes (except returning to start for clear at end)
-    const isVisited = path.includes(toId);
-    const allVisited = (countVisited() === countTotal());
-    if(isVisited && !(toId===startId && !allVisited)){
-      audio.play("error", 0.85);
-      return false;
-    }
-
-    // adjacency
-    const set = board.allow.get(fromId);
-    if(!set || !set.has(toId)){
-      audio.play("error", 0.8);
-      return false;
-    }
-
-    // wall/gate
-    if(!canTraverseEdge(fromId,toId)){
-      audio.play("error", 0.9);
-      return false;
-    }
-
-    // HARD constraint at current node
-    if(!hardOk(toId)){
-      audio.play("error", 0.9);
-      return false;
-    }
-
-    // move
-    if(path.length===1) startTimer();
-    path.push(toId);
-    edgesUsed.add(edgeKey(fromId,toId));
-    actions++; UI.act.textContent = String(actions);
-
-    // key pickup
-    if(board.keyNode!=null && toId===board.keyNode && !hasKey){
-      hasKey = true;
-      audio.play("key", 1.0);
-      audio.play("gate", 0.9);
-    }else{
-      audio.play("step", 0.75);
-    }
-
-    // clear?
-    if(checkClear()){
-      onClear();
-    }
-    draw();
-    return true;
-  }
-
-  function countTotal(){
-    let c=0;
-    for(const nd of board.nodes) if(!nd.hole) c++;
-    return c;
-  }
-  function countVisited(){
-    const s = new Set(path);
-    return s.size;
-  }
-
-  function checkClear(){
-    if(path.length < 4) return false;
-    const startId = board.startId;
-    const cur = path[path.length-1];
-    if(cur !== startId) return false;
-    // all non-hole visited
-    return countVisited() === countTotal();
-  }
-
-  function onClear(){
-    stopTimer();
-    UI.clear.textContent = "CLEAR!";
-    audio.play("clear", 1.0);
-
-    // streak
-    streak += 1;
-    bestStreak = Math.max(bestStreak, streak);
-    UI.streak.textContent = String(streak);
-    UI.best.textContent = String(bestStreak);
-    LS.set("loopline_streak", streak);
-    LS.set("loopline_best", bestStreak);
-
-    // today best time
-    const t = startedAt ? (Date.now()-startedAt) : null;
-    if(t!=null){
-      if(todayBest==null || t < todayBest){
-        todayBest = t;
-        LS.set(todayBestKey, todayBest);
-        UI.today.textContent = fmtTime(todayBest);
-      }else{
-        UI.today.textContent = fmtTime(todayBest);
-      }
-    }
-
-    // auto next in LEVEL
-    if(mode==="LEVEL"){
-      setTimeout(()=>{ nextLevel(); }, 550);
-    }
-  }
-
-  function undo(){
-    if(path.length<=1) return;
-    const last = path.pop();
-    const prev = path[path.length-1];
-    if(prev!=null){
-      edgesUsed.delete(edgeKey(prev,last));
-    }
-    // if undo over key pickup, recompute hasKey by presence in path
-    if(board.keyNode!=null){
-      hasKey = path.includes(board.keyNode);
-    }
-    actions++; UI.act.textContent = String(actions);
-    audio.play("undo", 0.85);
-    UI.clear.textContent = "";
-    draw();
-  }
-
-  // WARP action: if standing on warp node, teleport to other warp node (unvisited)
-  function warp(){
-    if(!board.warpA || !board.warpB) return;
-    if(path.length<1) return;
-    const cur = path[path.length-1];
-    let dest = null;
-    if(cur===board.warpA) dest = board.warpB;
-    if(cur===board.warpB) dest = board.warpA;
-    if(dest==null) { audio.play("error", 0.85); return; }
-    if(path.includes(dest)) { audio.play("error", 0.85); return; }
-    // teleport (no edge used)
-    path.push(dest);
-    actions++; UI.act.textContent = String(actions);
-    audio.play("warp", 1.0);
-    draw();
-  }
-
-  // ---------- UI buttons ----------
-  $("btnUndo").addEventListener("click", undo);
-  $("btnRetry").addEventListener("click", ()=>{
-    streak = 0; UI.streak.textContent = "0"; LS.set("loopline_streak", 0);
-    resetRun(true);
-  });
-  $("btnNew").addEventListener("click", ()=>resetRun(false));
-  $("btnNext").addEventListener("click", ()=>nextLevel());
-  $("btnEndless").addEventListener("click", ()=>{
-    setMode("ENDLESS");
-    streak = 0; UI.streak.textContent = "0"; LS.set("loopline_streak", 0);
-    level = 1; UI.level.textContent = "1";
-    beginLevel();
-  });
-
-  // double-tap/click on canvas to warp if enabled
-  let lastTap = 0;
-  cv.addEventListener("pointerdown", (e)=>{
-    const rect = cv.getBoundingClientRect();
-    const x = (e.clientX-rect.left) * (cv.width/rect.width);
-    const y = (e.clientY-rect.top)  * (cv.height/rect.height);
-
-    const now = Date.now();
-    if(now - lastTap < 280 && Tog.warp.checked){
-      warp();
-      lastTap = 0;
-      return;
-    }
-    lastTap = now;
-
-    const { node, dist2, step } = nearestNode(x,y);
-    const r = Math.max(16, step*0.18);
-    if(node && dist2 <= (r*r*1.25)){
-      tryMove(node.id);
-    }
-    dragging = true;
-    cv.setPointerCapture(e.pointerId);
-  }, {passive:true});
-
-  let dragging = false;
-  cv.addEventListener("pointermove", (e)=>{
-    if(!dragging) return;
-    const rect = cv.getBoundingClientRect();
-    const x = (e.clientX-rect.left) * (cv.width/rect.width);
-    const y = (e.clientY-rect.top)  * (cv.height/rect.height);
-    const { node, dist2, step } = nearestNode(x,y);
-    const r = Math.max(16, step*0.18);
-    if(node && dist2 <= (r*r*1.25)){
-      tryMove(node.id);
-    }
-  }, {passive:true});
-
-  cv.addEventListener("pointerup", (e)=>{
-    dragging = false;
-    try{ cv.releasePointerCapture(e.pointerId); }catch{}
-  }, {passive:true});
-
-  // ---------- Rendering ----------
-  function resizeCanvas(){
-    const rect = cv.getBoundingClientRect();
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const w = Math.max(320, Math.floor(rect.width * dpr));
-    const h = w; // square
-    if(cv.width!==w || cv.height!==h){
-      cv.width = w;
-      cv.height = h;
-    }
-  }
-  window.addEventListener("resize", ()=>{ resizeCanvas(); draw(); });
-
-  function getPad(){
-    return Math.round(Math.min(cv.width, cv.height)*0.09);
-  }
-
-  function draw(){
-    if(!board) return;
-    resizeCanvas();
-
-    const { n } = board;
-    const pad = getPad();
-    const size = Math.min(cv.width, cv.height) - pad*2;
-    const step = size/(n-1);
-
-    ctx.clearRect(0,0,cv.width,cv.height);
-
-    // background grid dots faint
-    ctx.globalAlpha = 0.18;
-    ctx.fillStyle = "#ffffff";
-    for(const nd of board.nodes){
-      if(nd.hole) continue;
-      const x = pad + nd.x*step;
-      const y = pad + nd.y*step;
-      ctx.beginPath(); ctx.arc(x,y,2.2,0,Math.PI*2); ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-
-    // draw walls (blocked edges)
-    ctx.lineWidth = Math.max(3, step*0.07);
-    ctx.strokeStyle = "rgba(255,255,255,.10)";
-    for(const k of board.walls){
-      const [a,b] = k.split("-").map(Number);
-      const A = board.nodes[a], B = board.nodes[b];
-      const ax = pad + A.x*step, ay = pad + A.y*step;
-      const bx = pad + B.x*step, by = pad + B.y*step;
-      ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
-    }
-
-    // gate edge
-    if(board.gateEdge){
-      const [a,b] = board.gateEdge.split("-").map(Number);
-      const A = board.nodes[a], B = board.nodes[b];
-      const ax = pad + A.x*step, ay = pad + A.y*step;
-      const bx = pad + B.x*step, by = pad + B.y*step;
-      ctx.lineWidth = Math.max(6, step*0.10);
-      ctx.strokeStyle = hasKey ? "rgba(124,255,124,.55)" : "rgba(255,107,107,.55)";
-      ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
-    }
-
-    // draw bridge edges (dashed)
-    ctx.lineWidth = Math.max(4, step*0.08);
-    ctx.strokeStyle = "rgba(110,231,255,.22)";
-    ctx.setLineDash([Math.max(6, step*0.18), Math.max(5, step*0.12)]);
-    for(const k of board.bridgeEdges){
-      const [a,b] = k.split("-").map(Number);
-      const A = board.nodes[a], B = board.nodes[b];
-      const ax = pad + A.x*step, ay = pad + A.y*step;
-      const bx = pad + B.x*step, by = pad + B.y*step;
-      ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
-    }
-    ctx.setLineDash([]);
-
-    // hint: show solution edges lightly
-    if(Tog.hint.checked){
-      ctx.lineWidth = Math.max(3, step*0.06);
-      ctx.strokeStyle = "rgba(124,255,124,.14)";
-      for(const k of board.solEdges){
-        const [a,b] = k.split("-").map(Number);
-        const A = board.nodes[a], B = board.nodes[b];
-        if(A.hole||B.hole) continue;
-        const ax = pad + A.x*step, ay = pad + A.y*step;
-        const bx = pad + B.x*step, by = pad + B.y*step;
-        ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
-      }
-    }
-
-    // used edges
-    ctx.lineWidth = Math.max(6, step*0.12);
-    ctx.strokeStyle = "#d7d9e2";
-    ctx.lineCap = "round";
-    for(const k of edgesUsed){
-      const [a,b] = k.split("-").map(Number);
-      const A = board.nodes[a], B = board.nodes[b];
-      const ax = pad + A.x*step, ay = pad + A.y*step;
-      const bx = pad + B.x*step, by = pad + B.y*step;
-      ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
-    }
-
-    // nodes
-    const visited = new Set(path);
-    for(const nd of board.nodes){
-      if(nd.hole) continue;
-      const x = pad + nd.x*step;
-      const y = pad + nd.y*step;
-      const r = Math.max(10, step*0.12);
-
-      // base
-      ctx.beginPath();
-      ctx.fillStyle = visited.has(nd.id) ? "rgba(255,255,255,.95)" : "rgba(255,255,255,.25)";
-      ctx.arc(x,y,r,0,Math.PI*2);
-      ctx.fill();
-
-      // special: start ring
-      if(nd.id===board.startId){
-        ctx.lineWidth = Math.max(3, step*0.06);
-        ctx.strokeStyle = "rgba(124,255,124,.85)";
-        ctx.beginPath(); ctx.arc(x,y,r+3,0,Math.PI*2); ctx.stroke();
-      }
-
-      // warp mark
-      if(nd.warp && Tog.warp.checked){
-        ctx.fillStyle = "rgba(110,231,255,.95)";
-        ctx.beginPath(); ctx.arc(x,y,Math.max(4, r*0.35),0,Math.PI*2); ctx.fill();
-      }
-
-      // key mark
-      if(nd.key && Tog.key.checked && !hasKey){
-        ctx.fillStyle = "rgba(255,229,124,.95)";
-        ctx.beginPath(); ctx.arc(x,y,Math.max(4, r*0.35),0,Math.PI*2); ctx.fill();
-      }
-    }
-
-    // HARD glyphs
-    if(Tog.hard.checked){
-      ctx.font = `${Math.max(12, step*0.18)}px system-ui`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillStyle = "rgba(255,255,255,.55)";
-      for(const [id, req] of board.hardReq.entries()){
-        const nd = board.nodes[id];
-        if(nd.hole) continue;
-        const x = pad + nd.x*step;
-        const y = pad + nd.y*step;
-        const g = req==="H" ? "━" : (req==="V" ? "│" : "└");
-        ctx.fillText(g, x, y);
-      }
-    }
-  }
-
-  function nextLevel(){
-    if(mode==="LEVEL"){
-      level += 1;
-      LS.set("loopline_level", level);
-      UI.level.textContent = String(level);
-      beginLevel();
-      return;
-    }
-    // endless: regenerate harder board as "level"
-    level += 1;
-    UI.level.textContent = String(level);
-    beginLevel();
-  }
-
-  // Initialize
-  setMode("LEVEL");
-  beginLevel();
-
-})();
-</script>
+      // 初期化
+      window.addEventListener("resize", () => { resizeCanvas(); draw(); });
+      resizeCanvas();
+      UI.mode.textContent = "LEVEL";
+      UI.level.textContent = "1";
+      buildLevel(levels[0].r, levels[0].c);
+    })();
+  </script>
 </body>
 </html>
